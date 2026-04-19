@@ -1,0 +1,53 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: mensagem-service
+
+  # Configuração para Banco de Dados H2 (Em Memória)
+  datasource:
+    url: jdbc:h2:mem:mensagemdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # Configuração AWS Cloud (LocalStack via Docker)
+  cloud:
+    aws:
+      sqs:
+        endpoint: http://localhost:4566
+        listener:
+          acknowledgement-mode: manual
+      region:
+        static: us-east-1
+      credentials:
+        access-key: test
+        secret-key: test
+
+cloud:
+  aws:
+    sqs:
+      queue-waba: waba-messages-queue
+      queue-test: messages-test-queue
+      queue-test-pessoa: messages-test-pessoa-queue
+
+logging:
+  level:
+    br.com.porto.mensagem: DEBUG

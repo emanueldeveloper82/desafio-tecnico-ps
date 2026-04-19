@@ -1,0 +1,13 @@
+services:
+  localstack:
+    container_name: localstack_challenge
+    image: localstack/localstack:3.0 # Força a versão 3.0 community
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=sqs
+      - DEBUG=1
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./init-sqs.sh:/etc/localstack/init/ready.d/init-sqs.sh"

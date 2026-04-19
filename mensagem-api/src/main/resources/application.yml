@@ -1,0 +1,32 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: mensagem-api
+  cloud:
+    aws:
+      region:
+        static: us-east-1
+      credentials:
+        access-key: test
+        secret-key: test
+      sqs:
+        endpoint: http://localhost:4566 # LocalStack
+
+# queues
+cloud:
+  aws:
+    sqs:
+      queue-weba: waba-messages-queue
+      queue-test: messages-test-queue
+      queue-test-pessoa: messages-test-pessoa-queue
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+
+
