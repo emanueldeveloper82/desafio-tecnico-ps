@@ -20,18 +20,14 @@ public class MessageProcessorService {
     @Transactional
     public void process(SQSMessageDTO dto) {
         try {
-            log.info("Processando DTO para persistência no MessageHistory...");
 
-            // Extração dos dados do JSON via JsonNode
             String wamid = dto.message().path("id").asText();
             String from = dto.message().path("from").asText();
             String type = dto.message().path("type").asText();
             String displayPhoneNumber = dto.metadata().path("display_phone_number").asText();
 
-            // Tratamento para pegar o corpo do texto (considerando o formato do WABA)
             String content = dto.message().path("text").path("body").asText();
 
-            // Usando o @Builder da sua Entity
             MessageHistory history = MessageHistory.builder()
                     .messageId(wamid)
                     .phoneNumberFrom(from)
@@ -43,14 +39,14 @@ public class MessageProcessorService {
                     .processedAt(LocalDateTime.now())
                     .build();
 
+            if (repository.existsByMessageId(dto.message().path("id").asText())) {
+                log.warn("Idempotência: Mensagem {} já processada anteriormente. Ignorando.", wamid);
+                return;
+            }
+
             repository.save(history);
 
-            log.info(">>>> MENSAGEM SALVA COM SUCESSO! ID: {}", wamid);
-
         } catch (Exception e) {
-            log.error("Erro ao processar e salvar no banco: {}", e.getMessage());
-
-            // Opcional: Salvar como falha no banco se você tiver o ID da mensagem
             throw new RuntimeException("Erro na persistência do histórico", e);
         }
     }

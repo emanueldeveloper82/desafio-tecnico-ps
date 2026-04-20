@@ -1,8 +1,10 @@
 package com.ciandt.mensagem_service.consumer;
 
+import com.ciandt.mensagem_service.aop.LogMessageAspect;
 import com.ciandt.mensagem_service.dto.SQSMessageDTO;
 import com.ciandt.mensagem_service.service.MessageProcessorService;
 import com.ciandt.mensagem_service.util.JsonSanitizer;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import io.awspring.cloud.sqs.listener.acknowledgement.Acknowledgement;
@@ -19,20 +21,15 @@ public class SQSMessageConsumer {
     private final ObjectMapper objectMapper;
     private final JsonSanitizer jsonSanitizer;
 
+    @LogMessageAspect
     @SqsListener(value = "${cloud.aws.sqs.queue-waba}")
-    public void listen(String messagePayload, Acknowledgement ack) {
-        try {
-            log.info("Chegou no Consumer! Lendo String bruta...");
-            String jsonLimpo = jsonSanitizer.sanitize(messagePayload);
+    public void listen(String messagePayload, Acknowledgement ack) throws JsonProcessingException {
+        String jsonLimpo = jsonSanitizer.sanitize(messagePayload);
 
-            SQSMessageDTO messageDto = objectMapper.readValue(jsonLimpo, SQSMessageDTO.class);
-            processorService.process(messageDto);
+        SQSMessageDTO messageDto = objectMapper.readValue(jsonLimpo, SQSMessageDTO.class);
+        processorService.process(messageDto);
 
-            ack.acknowledge();
-            log.info(">>>> SUCESSO TOTAL! Mensagem no banco.");
-        } catch (Exception e) {
-            log.error("Erro: {}", e.getMessage());
-        }
+        ack.acknowledge();
     }
 
 }

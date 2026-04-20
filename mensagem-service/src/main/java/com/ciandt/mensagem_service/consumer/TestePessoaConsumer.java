@@ -1,7 +1,7 @@
 package com.ciandt.mensagem_service.consumer;
 
+import com.ciandt.mensagem_service.aop.LogMessageAspect;
 import com.ciandt.mensagem_service.dto.PessoaTesteDTO;
-import com.ciandt.mensagem_service.service.MessageProcessorService;
 import com.ciandt.mensagem_service.util.JsonSanitizer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.sqs.annotation.SqsListener;
@@ -17,24 +17,13 @@ public class TestePessoaConsumer {
 
     private final ObjectMapper objectMapper;
     private final JsonSanitizer jsonSanitizer;
-    private final MessageProcessorService messageProcessorService;
 
+    @LogMessageAspect
     @SqsListener(value = "${cloud.aws.sqs.queue-test-pessoa}")
-    public void listen(String messagePayload, Acknowledgement ack) {
-        log.info("Recebi algo na fila de teste pessoa...");
-
-        try {
-            String jsonLimpo = jsonSanitizer.sanitize(messagePayload);
-
-            // Se você está testando com PessoaTesteDTO, use ela aqui:
-            PessoaTesteDTO pessoa = objectMapper.readValue(jsonLimpo, PessoaTesteDTO.class);
-
-            log.info(">>>> SUCESSO! Pessoa recebida: {}", pessoa.nome());
-
-            ack.acknowledge();
-
-        } catch (Exception e) {
-            log.error("Falha ao processar: {}", e.getMessage());
-        }
+    public void listen(String messagePayload, Acknowledgement ack) throws Exception {
+        String jsonLimpo = jsonSanitizer.sanitize(messagePayload);
+        PessoaTesteDTO pessoa = objectMapper.readValue(jsonLimpo, PessoaTesteDTO.class);
+        log.info("Processando domínio: Pessoa recebida -> {}", pessoa.nome());
+        ack.acknowledge();
     }
 }

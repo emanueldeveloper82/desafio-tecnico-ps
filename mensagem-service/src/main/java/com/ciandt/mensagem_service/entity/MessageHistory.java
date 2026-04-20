@@ -9,12 +9,13 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 
-@Entity
-@Table(name = "message_history")
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "message_history")
 public class MessageHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
