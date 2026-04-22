@@ -1,6 +1,6 @@
 # 🚀 WABA Messaging Infrastructure
 
-Este projeto contém a infraestrutura necessária para rodar o ecossistema de mensagens, utilizando Docker, LocalStack (SQS) e Postgres.
+Este projeto contém a infraestrutura necessária para rodar o ecossistema de mensagens, utilizando Docker, LocalStack (SQS) e H2.
 
 ## 🛠️ Pré-requisitos
 - Docker & Docker Compose
