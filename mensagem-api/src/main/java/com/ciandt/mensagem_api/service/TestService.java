@@ -16,13 +16,10 @@ public class TestService {
 
 
     public void processTestMessage(String mensagem) {
-        log.info("Encaminhando para o producer: {}", mensagem);
         sqsProducer.sendToQueueTest(mensagem);
-        log.info("Mensagem encaminhada para o producer: {}", mensagem);
     }
 
     public void processPessoaTeste(PessoaTesteDTO pessoa) {
-        log.info("Encaminhando pessoa para o producer: {}", pessoa.nome());
         sqsProducer.sendPessoaTeste(pessoa);
     }
 

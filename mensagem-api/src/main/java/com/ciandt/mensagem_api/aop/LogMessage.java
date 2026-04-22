@@ -1,4 +1,4 @@
-package com.ciandt.mensagem_service.aop;
+package com.ciandt.mensagem_api.aop;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.sqs.annotation.SqsListener;
@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.UUID;
-
 @Aspect
 @Component
 @Slf4j
@@ -25,8 +23,9 @@ public class LogMessage {
     private final ObjectMapper objectMapper;
     private final Environment environment;
 
-    @Around("@annotation(com.ciandt.mensagem_service.aop.LogMessageAspect)")
+    @Around("@annotation(com.ciandt.mensagem_api.aop.LogMessageAspect)")
     public Object handleLogging(ProceedingJoinPoint joinPoint) throws Throwable {
+
         Object[] args = joinPoint.getArgs();
         String flowName = extractFlowName(joinPoint);
         String correlationId = getOrGenerateCorrelationId(args);
@@ -37,7 +36,7 @@ public class LogMessage {
 
             String rawPayload = extractPayload(args);
 
-            if (rawPayload.isBlank() || "{}".equals(rawPayload)) {
+            if (rawPayload.isBlank()) {
                 log.info("Iniciando processamento [Fluxo: {}].", flowName);
             } else {
                 log.info("Iniciando processamento [Fluxo: {}]. Payload: {}", flowName, rawPayload);
@@ -56,7 +55,27 @@ public class LogMessage {
         }
     }
 
+
+    private String extractFlowName(ProceedingJoinPoint joinPoint) {
+        try {
+            MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+
+            if (signature.getMethod().isAnnotationPresent(PostMapping.class) ||
+                    signature.getMethod().isAnnotationPresent(GetMapping.class)) {
+                return "HTTP-" + signature.getMethod().getName().toUpperCase();
+            }
+
+            SqsListener sqs = signature.getMethod().getAnnotation(SqsListener.class);
+            if (sqs != null) return "SQS-" + environment.resolvePlaceholders(sqs.value()[0]);
+
+            return "INTERNAL-" + signature.getName();
+        } catch (Exception e) {
+            return "UNKNOWN-FLOW";
+        }
+    }
+
     private String getOrGenerateCorrelationId(Object[] args) {
+
         String currentId = MDC.get("messageId");
         if (currentId != null && !currentId.isBlank()) {
             return currentId;
@@ -70,34 +89,12 @@ public class LogMessage {
                 }
             }
         }
-        return "corr-" + UUID.randomUUID();
-    }
-
-    private String extractFlowName(ProceedingJoinPoint joinPoint) {
-        try {
-            MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-
-            if (signature.getMethod().isAnnotationPresent(PostMapping.class) ||
-                    signature.getMethod().isAnnotationPresent(GetMapping.class)) {
-                return "HTTP-" + signature.getMethod().getName().toUpperCase();
-            }
-
-            SqsListener sqs = signature.getMethod().getAnnotation(SqsListener.class);
-            if (sqs != null) {
-                return "SQS-" + environment.resolvePlaceholders(sqs.value()[0]);
-            }
-
-            return "INTERNAL-" + signature.getName();
-        } catch (Exception e) {
-            return "UNKNOWN-FLOW";
-        }
+        return "corr-" + java.util.UUID.randomUUID().toString().substring(0, 31);
     }
 
     private String extractPayload(Object[] args) {
         if (args.length > 0 && !(args[0] instanceof org.springframework.messaging.MessageHeaders)) {
             try {
-                if (args[0] instanceof String) return (String) args[0];
-
                 return objectMapper.writeValueAsString(args[0]);
             } catch (Exception e) {
                 return "";
@@ -105,5 +102,4 @@ public class LogMessage {
         }
         return "";
     }
-
 }

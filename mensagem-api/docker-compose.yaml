@@ -1,7 +1,7 @@
 services:
   localstack:
     container_name: localstack_challenge
-    image: localstack/localstack:3.0 # Força a versão 3.0 community
+    image: localstack/localstack:3.0 # versão 3.0 community forçada devido a versões novas serem pagas...
     ports:
       - "4566:4566"
     environment:

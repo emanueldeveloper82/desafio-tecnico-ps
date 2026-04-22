@@ -1,5 +1,6 @@
 package com.ciandt.mensagem_api.controller;
 
+import com.ciandt.mensagem_api.aop.LogMessageAspect;
 import com.ciandt.mensagem_api.dto.WabaWebhookDTO;
 import com.ciandt.mensagem_api.service.WebhookService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,19 +21,11 @@ public class WebhookController {
 
     private final WebhookService service;
 
+    @LogMessageAspect
     @Operation(summary = "Recebe mensagens do WABA", description = "Valida o payload e encaminha para a fila SQS")
     @PostMapping("/whatsapp")
     public ResponseEntity<Void> receiveMessage(@Valid @RequestBody WabaWebhookDTO payload) {
-
         service.processWebhook(payload);
         return ResponseEntity.ok().build();
     }
-
-
-//    @GetMapping("/history")
-//    public ResponseEntity<Page<MessageHistory>> getHistory(
-//            @ParameterObject Pageable pageable) {
-//        return ResponseEntity.ok(repository.findAll(pageable));
-//    }
-
 }

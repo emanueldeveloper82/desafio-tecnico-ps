@@ -1,6 +1,7 @@
 package com.ciandt.mensagem_service.service;
 
 import com.ciandt.mensagem_service.dto.BotResponseDTO;
+import com.ciandt.mensagem_service.dto.MessageResponseDTO;
 import com.ciandt.mensagem_service.dto.SQSMessageDTO;
 import com.ciandt.mensagem_service.entity.BotConfiguration;
 import com.ciandt.mensagem_service.entity.MessageHistory;
@@ -8,10 +9,14 @@ import com.ciandt.mensagem_service.repository.MessageHistoryRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MessageHistoryService {
@@ -38,6 +43,26 @@ public class MessageHistoryService {
                 .build();
         repository.save(history);
     }
+
+    public ResponseEntity<List<MessageResponseDTO>> findAllMessages() {
+        log.info("Consulta de histórico iniciada. Buscando registros no banco H2...");
+
+        List<MessageResponseDTO> response = repository.findAll().stream()
+                .map(m -> new MessageResponseDTO(
+                        m.getMessageId(),
+                        m.getMessageContent(),
+                        m.getPhoneNumberFrom(),
+                        m.getPhoneNumberTo(),
+                        m.getStatus(),
+                        m.getProcessedAt()
+                ))
+                .toList();
+
+        log.info("Consulta finalizada. {} mensagens encontradas.", response.size());
+
+        return ResponseEntity.ok(response);
+    }
+
 
     private MessageHistory.MessageHistoryBuilder fillBasicInfo(SQSMessageDTO sqs) {
         return MessageHistory.builder()

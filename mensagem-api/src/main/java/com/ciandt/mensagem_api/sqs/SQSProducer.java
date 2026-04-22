@@ -27,15 +27,19 @@ public class SQSProducer {
         try {
             Map<String, Object> messageToQueue = getStringObjectMap(entryId, value);
             String jsonPayload = objectMapper.writeValueAsString(messageToQueue);
-            log.info("Enviando JSON real para SQS: {}", jsonPayload);
+
+            String currentTraceId = org.slf4j.MDC.get("messageId");
 
             sqsTemplate.send(to -> to
                     .queue(queueWeba)
-                    .payload(jsonPayload));
+                    .payload(jsonPayload)
+                    .header("correlationId", org.slf4j.MDC.get("messageId"))
+            );
+
+
 
         } catch (Exception e) {
-            log.error("Erro ao converter ou enviar mensagem: {}", e.getMessage());
-            throw new SQSException("Erro ao formatar ou enviar mensagem", e);
+            throw new SQSException("Erro na fila SQS", e);
         }
     }
 

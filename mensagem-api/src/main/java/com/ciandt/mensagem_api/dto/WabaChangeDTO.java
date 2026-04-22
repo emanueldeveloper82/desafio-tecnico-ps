@@ -1,19 +1,21 @@
 package com.ciandt.mensagem_api.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 
 import java.util.List;
 
 
 public record WabaChangeDTO(
         String field,
-        ValueDTO value
+        @Valid ValueDTO value
 ) {
     public record ValueDTO(
             @JsonProperty("messaging_product") @NotBlank String messagingProduct,
             MetadataDTO metadata,
-            List<MessageDTO> messages
+            @NotEmpty @Valid List<MessageDTO> messages
     ) {}
 
     public record MetadataDTO(
@@ -22,12 +24,15 @@ public record WabaChangeDTO(
     ) {}
 
     public record MessageDTO(
+            @NotBlank(message = "O campo 'from' é obrigatório")
             String from,
+            @NotBlank(message = "O 'id' da mensagem é obrigatório")
             String id,
             String timestamp,
+            @NotBlank(message = "O 'type' da mensagem é obrigatório")
             String type,
-            TextDTO text
+            @Valid TextDTO text
     ) {}
 
-    public record TextDTO(String body) {}
+    public record TextDTO(@NotBlank(message = "O corpo da mensagem não pode estar vazio") String body) {}
 }

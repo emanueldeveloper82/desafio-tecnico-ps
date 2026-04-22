@@ -15,7 +15,7 @@ public class TesteConsumer {
 
     @LogMessageAspect
     @SqsListener(value = "${cloud.aws.sqs.queue-test}")
-    public void listenTeste(String mensagem, Acknowledgement ack) {
+    public void listenTeste(String mensagem, Acknowledgement ack, org.springframework.messaging.MessageHeaders headers) {
         processMessage(mensagem);
         ack.acknowledge();
     }

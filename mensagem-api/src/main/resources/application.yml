@@ -30,3 +30,6 @@ springdoc:
     path: /v3/api-docs
 
 
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - [ID:%X{messageId}] [FLOW:%X{flow}] - %msg%n"

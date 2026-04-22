@@ -25,7 +25,9 @@ public class SQSTestProducer {
     public void sendToQueueTest(String mensagem) {
         sqsTemplate.send(to -> to
                 .queue(queueTest)
-                .payload(mensagem));
+                .payload(mensagem)
+                .header("correlationId", org.slf4j.MDC.get("messageId"))
+        );
 
     }
 

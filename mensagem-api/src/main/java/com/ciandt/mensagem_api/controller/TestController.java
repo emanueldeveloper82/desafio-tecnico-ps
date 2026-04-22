@@ -1,6 +1,7 @@
 package com.ciandt.mensagem_api.controller;
 
 
+import com.ciandt.mensagem_api.aop.LogMessageAspect;
 import com.ciandt.mensagem_api.dto.PessoaTesteDTO;
 import com.ciandt.mensagem_api.service.TestService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +21,7 @@ public class TestController {
 
     private final TestService service;
 
+    @LogMessageAspect
     @Operation(summary = "Teste de uma simples mensagem", description = "Envia uma simples mensagem para teste do consumidor")
     @PostMapping("/mensagem")
     public String enviarSimples(@RequestBody String mensagem) {
@@ -27,6 +29,7 @@ public class TestController {
         return "Mensagem enviada: " + mensagem;
     }
 
+    @LogMessageAspect
     @Operation(summary = "Teste de Payload Estruturado", description = "Envia um objeto simples (Nome, Idade, Telefone) para a fila de teste")
     @PostMapping("/pessoa")
     public ResponseEntity<String> enviarPessoaTeste(@RequestBody PessoaTesteDTO pessoa) {
